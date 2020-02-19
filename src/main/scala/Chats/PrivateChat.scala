@@ -1,9 +1,10 @@
+package Chats
+
 import akka.actor.{Actor, ActorLogging, ActorRef}
 import akka.cluster.pubsub.DistributedPubSub
 import akka.cluster.pubsub.DistributedPubSubMediator.{Put, Send}
 
-trait Command
-case class PrivateMessage(msg: String, name: String) extends Command
+case class PrivateMessage(msg: String, name: String)
 
 class PrivateChatDestination extends Actor with ActorLogging{
   val mediator: ActorRef = DistributedPubSub(context.system).mediator
