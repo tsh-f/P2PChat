@@ -5,14 +5,12 @@ import akka.actor.{Actor, ActorLogging, ActorRef}
 import akka.cluster.pubsub.DistributedPubSub
 import akka.cluster.pubsub.DistributedPubSubMediator.{Put, Send}
 
-case class PrivateMessage(msg: String, name: String)
-
 class PrivateChatDestination(chatUI: ChatUI) extends Actor with ActorLogging{
   val mediator: ActorRef = DistributedPubSub(context.system).mediator
   mediator ! Put(self)
   override def receive: Receive = {
-    case msg: String =>
-      log.info("Got {}", msg)
+    case PrivateMessage(msg, name) =>
+      chatUI.printMessage(msg, name)
   }
 }
 
@@ -21,6 +19,6 @@ class PrivateChatSender(chatUI: ChatUI) extends Actor with ActorLogging{
 
   override def receive: Receive = {
     case PrivateMessage(msg, name) =>
-      mediator ! Send(path = s"/user/$name", msg, localAffinity = true)
+      mediator ! Send(path = s"/user/$name", PrivateMessage(msg, name), localAffinity = true)
   }
 }

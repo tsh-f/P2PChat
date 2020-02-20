@@ -11,9 +11,9 @@ class ChatRoom(chatUI: ChatUI) extends Actor with ActorLogging {
 
   override def receive: Receive = {
     case str: String =>
-      log.info("Got {}", str)
+      log.info(str, self.toString())
     case MessageToPublish(msg, name) =>
-      chatUI.sendMessage(name + ": " + msg)
+      chatUI.printMessage(msg, name)
     case SubscribeAck(Subscribe("ChatRoom", None, self)) =>
       log.info("subscribing")
   }
@@ -23,9 +23,7 @@ class Publisher(chatUI: ChatUI) extends Actor {
   val mediator: ActorRef = DistributedPubSub(context.system).mediator
 
   override def receive: Receive = {
-    case msg: String =>
-      mediator ! Publish("ChatRoom", msg)
     case MessageToPublish(msg, name) =>
-      mediator ! Publish("ChatRoom", MessageToPublish(msg,name))
+      mediator ! Publish("ChatRoom", MessageToPublish(msg, name))
   }
 }

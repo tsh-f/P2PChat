@@ -2,7 +2,7 @@ package Source
 
 import Chats._
 import UI.ChatUI
-import akka.actor.{ActorSystem, Props}
+import akka.actor.{ActorRef, ActorSystem, Props}
 import akka.cluster.Cluster
 import com.typesafe.config.{Config, ConfigFactory}
 
@@ -16,17 +16,19 @@ class ClusterChat(ip: String) {
     check = true
   })
 
-  def createActors(name: String, chatUI: ChatUI): Unit = {
+  def createActors(name: String, chatUI: ChatUI): Array[ActorRef] = {
     this.name = name
-    val actor = system.actorOf(Props(classOf[ChatRoom], chatUI), ip.toString)
-    val publisher = system.actorOf(Props(classOf[Publisher], chatUI), ip.toString + "pub")
-    val privateChat = system.actorOf(Props(classOf[PrivateChatDestination], chatUI), name)
-    val senderPrivateMessages = system.actorOf(Props(classOf[PrivateChatSender], chatUI))
-    Thread.sleep(5000)
-    publisher ! MessageToPublish("Hi all", name)
-    Thread.sleep(5000)
-    publisher ! "FCK MY LIFE"
-    senderPrivateMessages ! PrivateMessage(s"Hi, it's $name", "dad")
+    val actors: Array[ActorRef] = Array(
+      system.actorOf(Props(classOf[ChatRoom], chatUI), ip.toString),
+      system.actorOf(Props(classOf[Publisher], chatUI), ip.toString + "pub"),
+      system.actorOf(Props(classOf[PrivateChatDestination], chatUI), name),
+      system.actorOf(Props(classOf[PrivateChatSender], chatUI)))
+//    Thread.sleep(5000)
+//    actors(1) ! MessageToPublish("Hi all", name)
+//    Thread.sleep(5000)
+//    actors(1) ! "FCK MY LIFE"
+//    actors(3) ! PrivateMessage(s"Hi, it's $name", "dad")
+    actors
   }
 
   private def createConnection: ActorSystem = {

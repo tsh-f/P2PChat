@@ -1,6 +1,8 @@
 package UI
 
+import Chats.{MessageToPublish, PrivateMessage}
 import Source.ClusterChat
+import akka.actor.ActorRef
 import javafx.application.{Application, Platform}
 import javafx.concurrent.{Service, Task}
 import javafx.scene.Scene
@@ -17,6 +19,11 @@ class ChatUI extends Application {
   private val fieldForMessage: TextField = new TextField()
   private val submit: Button = new Button("Enter")
   private var clusterChat: ClusterChat = _
+  private var actors: Array[ActorRef] = Array.empty
+  private var publisher: ActorRef = _
+  private var senderPrivateMessages: ActorRef = _
+  private var str = ""
+  private var indexString = 0
   text.setPrefSize(300, 300)
   text.setEditable(false)
   root.getChildren.addAll(text, fieldForMessage, submit)
@@ -24,7 +31,7 @@ class ChatUI extends Application {
   submit.setOnAction(e => {
     counter match {
       case 2 =>
-        publish !
+        sendMessages()
       case 0 =>
         createActorSystem()
       case 1 =>
@@ -37,7 +44,7 @@ class ChatUI extends Application {
     primaryStage.setScene(scene)
     primaryStage.show()
 
-//    createService()
+    //    createService()
 
     primaryStage.setOnCloseRequest(e => {
       Platform.exit()
@@ -56,7 +63,9 @@ class ChatUI extends Application {
       Thread.sleep(1000)
     }
     name = fieldForMessage.getText()
-    clusterChat.createActors(name, this)
+    actors = clusterChat.createActors(name, this)
+    publisher = actors(1)
+    senderPrivateMessages = actors(3)
     fieldForMessage.clear()
     counter += 1
   }
@@ -75,12 +84,19 @@ class ChatUI extends Application {
     service.start()
   }
 
-  def sendMessage(str: String) : Unit = {
-    text.appendText(str)
+  def printMessage(str: String, name: String): Unit = {
+    text.appendText(name + ": " + str + "\n")
   }
 
-  def getMessage(): String ={
-
+  def sendMessages(): Unit ={
+    str = fieldForMessage.getText()
+    if (str.charAt(0).equals('@')) {
+      indexString = str.indexOf(" ")
+      senderPrivateMessages ! PrivateMessage(str.substring(indexString, str.length), name)
+    } else {
+      publisher ! MessageToPublish(str, name)
+    }
+    fieldForMessage.clear()
   }
 }
 
