@@ -24,7 +24,7 @@ class ChatUI extends Application {
   submit.setOnAction(e => {
     counter match {
       case 2 =>
-
+        publish !
       case 0 =>
         createActorSystem()
       case 1 =>
@@ -36,6 +36,8 @@ class ChatUI extends Application {
     primaryStage.setTitle("Chat")
     primaryStage.setScene(scene)
     primaryStage.show()
+
+//    createService()
 
     primaryStage.setOnCloseRequest(e => {
       Platform.exit()
@@ -75,6 +77,10 @@ class ChatUI extends Application {
 
   def sendMessage(str: String) : Unit = {
     text.appendText(str)
+  }
+
+  def getMessage(): String ={
+
   }
 }
 

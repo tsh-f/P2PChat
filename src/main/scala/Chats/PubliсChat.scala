@@ -5,7 +5,7 @@ import akka.actor.{Actor, ActorLogging, ActorRef}
 import akka.cluster.pubsub.DistributedPubSub
 import akka.cluster.pubsub.DistributedPubSubMediator.{Publish, Subscribe, SubscribeAck}
 
-class ChatRoom extends Actor with ActorLogging {
+class ChatRoom(chatUI: ChatUI) extends Actor with ActorLogging {
   val mediator: ActorRef = DistributedPubSub(context.system).mediator
   mediator ! Subscribe("ChatRoom", self)
 
@@ -19,11 +19,13 @@ class ChatRoom extends Actor with ActorLogging {
   }
 }
 
-class Publisher extends Actor {
+class Publisher(chatUI: ChatUI) extends Actor {
   val mediator: ActorRef = DistributedPubSub(context.system).mediator
 
   override def receive: Receive = {
     case msg: String =>
       mediator ! Publish("ChatRoom", msg)
+    case MessageToPublish(msg, name) =>
+      mediator ! Publish("ChatRoom", MessageToPublish(msg,name))
   }
 }

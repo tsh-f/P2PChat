@@ -1,6 +1,7 @@
 package Source
 
 import Chats._
+import UI.ChatUI
 import akka.actor.{ActorSystem, Props}
 import akka.cluster.Cluster
 import com.typesafe.config.{Config, ConfigFactory}
@@ -15,13 +16,13 @@ class ClusterChat(ip: String) {
     check = true
   })
 
-  def createActors(name: String): Unit = {
+  def createActors(name: String, chatUI: ChatUI): Unit = {
     this.name = name
-    val actor = system.actorOf(Props[ChatRoom], ip.toString)
-    val publisher = system.actorOf(Props[Publisher], ip.toString + "pub")
-    val privateChat = system.actorOf(Props[PrivateChatDestination], name)
-    val senderPrivateMessages = system.actorOf(Props[PrivateChatSender])
-    Thread.sleep(1000)
+    val actor = system.actorOf(Props(classOf[ChatRoom], chatUI), ip.toString)
+    val publisher = system.actorOf(Props(classOf[Publisher], chatUI), ip.toString + "pub")
+    val privateChat = system.actorOf(Props(classOf[PrivateChatDestination], chatUI), name)
+    val senderPrivateMessages = system.actorOf(Props(classOf[PrivateChatSender], chatUI))
+    Thread.sleep(5000)
     publisher ! MessageToPublish("Hi all", name)
     Thread.sleep(5000)
     publisher ! "FCK MY LIFE"
