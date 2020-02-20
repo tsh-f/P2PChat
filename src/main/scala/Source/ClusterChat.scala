@@ -23,11 +23,6 @@ class ClusterChat(ip: String) {
       system.actorOf(Props(classOf[Publisher], chatUI), ip.toString + "pub"),
       system.actorOf(Props(classOf[PrivateChatDestination], chatUI), name),
       system.actorOf(Props(classOf[PrivateChatSender], chatUI)))
-//    Thread.sleep(5000)
-//    actors(1) ! MessageToPublish("Hi all", name)
-//    Thread.sleep(5000)
-//    actors(1) ! "FCK MY LIFE"
-//    actors(3) ! PrivateMessage(s"Hi, it's $name", "dad")
     actors
   }
 
