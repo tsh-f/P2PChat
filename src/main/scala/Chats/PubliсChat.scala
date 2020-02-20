@@ -10,8 +10,6 @@ class ChatRoom(chatUI: ChatUI) extends Actor with ActorLogging {
   mediator ! Subscribe("ChatRoom", self)
 
   override def receive: Receive = {
-    case str: String =>
-      log.info(str, self.toString())
     case MessageToPublish(msg, name) =>
       chatUI.printMessage(msg, name)
     case SubscribeAck(Subscribe("ChatRoom", None, self)) =>

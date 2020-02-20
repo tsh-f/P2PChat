@@ -1,10 +1,9 @@
 package UI
 
 import Chats.{MessageToPublish, PrivateMessage}
-import Source.ClusterChat
+import Source.{ClusterChat, MessagesSender}
 import akka.actor.ActorRef
 import javafx.application.{Application, Platform}
-import javafx.concurrent.{Service, Task}
 import javafx.scene.Scene
 import javafx.scene.control.{Button, TextArea, TextField}
 import javafx.scene.layout.VBox
@@ -44,7 +43,7 @@ class ChatUI extends Application {
     primaryStage.setScene(scene)
     primaryStage.show()
 
-    //    createService()
+    val messagesSender = new MessagesSender(submit, fieldForMessage)
 
     primaryStage.setOnCloseRequest(e => {
       Platform.exit()
@@ -70,20 +69,6 @@ class ChatUI extends Application {
     counter += 1
   }
 
-  def createService(): Unit = {
-    val service = new Service[Void] {
-      override def createTask(): Task[Void] = {
-        () => {
-          while (true) {
-            Thread.sleep(5000)
-          }
-          null
-        }
-      }
-    }
-    service.start()
-  }
-
   def printMessage(str: String, name: String): Unit = {
     text.appendText(name + ": " + str + "\n")
   }
@@ -92,7 +77,7 @@ class ChatUI extends Application {
     str = fieldForMessage.getText()
     if (str.charAt(0).equals('@')) {
       indexString = str.indexOf(" ")
-      senderPrivateMessages ! PrivateMessage(str.substring(indexString, str.length), name)
+      senderPrivateMessages ! PrivateMessage(str.substring(indexString, str.length), str.substring(1, indexString), name)
     } else {
       publisher ! MessageToPublish(str, name)
     }
