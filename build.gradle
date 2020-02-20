@@ -39,4 +39,4 @@ dependencies {
 
 }
 
-mainClassName = 'ChatUI'
+mainClassName = 'UI.ChatUI'

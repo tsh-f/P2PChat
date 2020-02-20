@@ -1,5 +1,6 @@
 package Chats
 
+import UI.ChatUI
 import akka.actor.{Actor, ActorLogging, ActorRef}
 import akka.cluster.pubsub.DistributedPubSub
 import akka.cluster.pubsub.DistributedPubSubMediator.{Publish, Subscribe, SubscribeAck}
@@ -11,6 +12,8 @@ class ChatRoom extends Actor with ActorLogging {
   override def receive: Receive = {
     case str: String =>
       log.info("Got {}", str)
+    case MessageToPublish(msg, name) =>
+      chatUI.sendMessage(name + ": " + msg)
     case SubscribeAck(Subscribe("ChatRoom", None, self)) =>
       log.info("subscribing")
   }
