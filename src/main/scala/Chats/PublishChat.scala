@@ -6,12 +6,12 @@ import akka.cluster.pubsub.DistributedPubSubMediator.{Publish, Subscribe, Subscr
 
 class ChatRoom extends Actor with ActorLogging {
   val mediator: ActorRef = DistributedPubSub(context.system).mediator
-  mediator ! Subscribe("Chats.ChatRoom", self)
+  mediator ! Subscribe("ChatRoom", self)
 
   override def receive: Receive = {
     case str: String =>
       log.info("Got {}", str)
-    case SubscribeAck(Subscribe("Chats.ChatRoom", None, self)) =>
+    case SubscribeAck(Subscribe("ChatRoom", None, self)) =>
       log.info("subscribing")
   }
 }
@@ -21,6 +21,6 @@ class Publisher extends Actor {
 
   override def receive: Receive = {
     case msg: String =>
-      mediator ! Publish("Chats.ChatRoom", msg)
+      mediator ! Publish("ChatRoom", msg)
   }
 }

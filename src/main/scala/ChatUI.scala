@@ -1,57 +1,29 @@
-import akka.actor.{Actor, ActorRef, ActorSystem, Props}
-import javafx.application.Application
-import javafx.event.EventHandler
+import javafx.application.{Application, Platform}
 import javafx.scene.Scene
 import javafx.scene.control.{Button, TextArea, TextField}
-import javafx.scene.input.MouseEvent
 import javafx.scene.layout.VBox
 import javafx.stage.Stage
 
-//case class SendMessage(msg: String)
-//case class SetName(name: String)
-//case class SetIp(ip: String)
-
-class ChatUI(system:ActorSystem) extends Application with Actor{
-  var counter = 0
-  val actorOfCluster:ActorRef = system.actorOf(Props[ClusterChat])
-  val root = new VBox()
-  val scene = new Scene(root, 400,400)
-  val text = new TextArea()
-  val fieldForMessage = new TextField()
-  val submit = new Button("Enter")
+class ChatUI extends Application {
+  private var counter: Int = 0
+  private val root: VBox = new VBox()
+  private val scene: Scene = new Scene(root, 400,400)
+  private val text: TextArea = new TextArea()
+  private val fieldForMessage: TextField = new TextField()
+  private val submit: Button = new Button("Enter")
+  private var clusterChat: ClusterChat = _
   text.setPrefSize(300,300)
   root.getChildren.addAll(text, submit, fieldForMessage)
-
-  val nameHandler: EventHandler[MouseEvent] = {
-    @Override
-    def handle(e: MouseEvent) {
-      actorOfCluster ! Name(fieldForMessage.getText)
-    }
-  };
-
-  val ipHandler: EventHandler[MouseEvent] = {
-    @Override
-    def handle(e: MouseEvent) {
-      actorOfCluster ! Ip(fieldForMessage.getText)
-    }
-  };
-
-  val messageHandler: EventHandler[MouseEvent] ={
-    @Override
-    def handle(e: MouseEvent): Unit ={
-
-    }
-  }
 
   submit.setOnAction(e => {
     counter match {
       case 2 =>
 
       case 0 =>
-        actorOfCluster ! Name(fieldForMessage.getText)
+        createActorSystem()
         counter += 1
       case 1 =>
-        actorOfCluster ! Ip(fieldForMessage.getText)
+        createActors()
         counter += 1
     }
   })
@@ -61,18 +33,24 @@ class ChatUI(system:ActorSystem) extends Application with Actor{
     primaryStage.setScene(scene)
     primaryStage.show()
 
-    submit.addEventFilter(MouseEvent.MOUSE_PRESSED, nameHandler)
+    primaryStage.setOnCloseRequest(e => Platform.exit());
   }
 
-  override def receive: Receive = {
-    case _ => //ignoring
+  def createActorSystem(): Unit = {
+    clusterChat = new ClusterChat(fieldForMessage.getText())
+    counter += 1
   }
 
-  def getName() ={
-    submit.addEventFilter(MouseEvent.MOUSE_PRESSED, nameHandler)
+  def createActors(): Unit = {
+    while(!clusterChat.getCheckMemberStatus){
+      Thread.sleep(1000)
+    }
+    clusterChat.createActors(fieldForMessage.getText())
   }
+}
 
-  def getIp() ={
-    submit.addEventFilter(MouseEvent.MOUSE_PRESSED, ipHandler)
+object ChatUI{
+  def main(args: Array[String]): Unit = {
+    Application.launch(classOf[ChatUI], args: _*)
   }
 }

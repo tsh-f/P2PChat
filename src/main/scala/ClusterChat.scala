@@ -1,20 +1,18 @@
-import Chats.{ChatRoom, PrivateChatDestination, PrivateChatSender, PrivateMessage, Publisher}
-import akka.actor.{Actor, ActorRef, ActorSystem, Props}
+import Chats._
+import akka.actor.{ActorSystem, Props}
 import akka.cluster.Cluster
 import com.typesafe.config.{Config, ConfigFactory}
 
-trait Command
-case class Message(msg: String) extends Command
-case class Name(msg: String) extends Command
-case class Ip(ip:String) extends Command
+class ClusterChat(ip: String) {
+  private val system: ActorSystem = createConnection
+  private val cluster: Cluster = Cluster(system)
+  private var check: Boolean = false
 
-class ClusterChat extends Actor {
-  val systemOfUI: ActorSystem = ActorSystem("UI")
-  val chatUI: ActorRef = systemOfUI.actorOf(Props(classOf[ChatUI], systemOfUI))
-  var name: String = ""
-  var ip: String = ""
+  cluster.registerOnMemberUp({
+    check = true
+  })
 
-  def createActors(system: ActorSystem): Unit ={
+  def createActors(name: String): Unit = {
     val actor = system.actorOf(Props[ChatRoom], ip.toString)
     val publisher = system.actorOf(Props[Publisher], ip.toString + "pub")
     val privateChat = system.actorOf(Props[PrivateChatDestination], name)
@@ -26,25 +24,15 @@ class ClusterChat extends Actor {
     senderPrivateMessages ! PrivateMessage(s"Hi, it's $name", "dad")
   }
 
-  override def receive: Receive = {
-    case Name(msg) =>
-      name = msg
-    case Ip(msg) =>
-      ip = msg
-      createConnection()
-  }
-
-  def createConnection(): Unit ={
+  private def createConnection: ActorSystem = {
     val config: Config = ConfigFactory.parseString(s"""akka.remote.artery.canonical.hostname = "127.0.0.$ip"""")
       .withFallback(ConfigFactory.load())
     val system: ActorSystem = ActorSystem("Cluster", config)
-    val cluster: Cluster = Cluster(system)
-    cluster.registerOnMemberUp({
-      createActors(system)
-    })
+    system
   }
+
+  def getActorSystem: ActorSystem = system
+
+  def getCheckMemberStatus: Boolean = check
 }
 
-object Node1 extends App {
-  new ClusterChat
-}

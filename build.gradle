@@ -7,36 +7,36 @@
  */
 
 plugins {
-    // Apply the java plugin to add support for Java
     id 'scala'
 
-    // Apply the application plugin to add support for building a CLI application.
     id 'application'
+
+    id 'org.openjfx.javafxplugin' version '0.0.8'
 }
 
 repositories {
     mavenCentral()
 }
 
-def currentOS = org.gradle.internal.os.OperatingSystem.current()
-def platform
-if (currentOS.isWindows()) {
-    platform = 'win'
-} else if (currentOS.isLinux()) {
-    platform = 'linux'
-} else if (currentOS.isMacOsX()) {
-    platform = 'mac'
+
+javafx {
+    version = "13"
+    modules = [ 'javafx.controls' ]
 }
 
 dependencies {
-    compile group: 'com.typesafe.akka', name: 'akka-cluster_2.13', version: '2.6.3'
-    compile group: 'com.typesafe.akka', name: 'akka-cluster-tools_2.13', version: '2.6.3'
-    compile "org.openjfx:javafx-base:11:${platform}"
-    compile "org.openjfx:javafx-graphics:11:${platform}"
-    compile "org.openjfx:javafx-controls:11:${platform}"
-    compile "org.openjfx:javafx-fxml:11:${platform}"
+    implementation group: 'com.typesafe.akka', name: 'akka-cluster_2.13', version: '2.6.3'
 
+    implementation group: 'com.typesafe.akka', name: 'akka-cluster-tools_2.13', version: '2.6.3'
+
+    implementation group: 'org.openjfx', name: 'javafx-base', version: '13'
+
+    implementation group: 'org.openjfx', name: 'javafx-graphics', version: '13'
+
+    implementation group: 'org.openjfx', name: 'javafx-controls', version: '13'
+
+    implementation group: 'org.openjfx', name: 'javafx-fxml', version: '13'
 
 }
 
-mainClassName = 'Node1'
+mainClassName = 'ChatUI'
