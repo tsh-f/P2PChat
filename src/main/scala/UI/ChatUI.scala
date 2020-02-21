@@ -4,6 +4,7 @@ import Source.MessagesSender
 import javafx.application.{Application, Platform}
 import javafx.scene.Scene
 import javafx.scene.control.{Button, TextArea, TextField}
+import javafx.scene.input.{KeyCode, KeyEvent}
 import javafx.scene.layout.VBox
 import javafx.stage.Stage
 
@@ -16,8 +17,8 @@ class ChatUI extends Application {
   private val messagesSender = new MessagesSender(submit, fieldForMessage, this)
   text.setPrefSize(300, 300)
   text.setEditable(false)
+  text.setWrapText(true)
   root.getChildren.addAll(text, fieldForMessage, submit)
-
 
   override def start(primaryStage: Stage): Unit = {
     primaryStage.setTitle("Chat")
@@ -33,6 +34,11 @@ class ChatUI extends Application {
   def printMessage(str: String, name: String): Unit = {
     text.appendText(name + ": " + str + "\n")
   }
+
+  fieldForMessage.setOnKeyPressed((e: KeyEvent) => {
+    if (e.getCode.equals(KeyCode.ENTER))
+      submit.fire()
+  })
 }
 
 object ChatUI {
