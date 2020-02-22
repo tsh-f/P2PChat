@@ -1,7 +1,10 @@
+import com.github.jengelman.gradle.plugins.shadow.transformers.AppendingTransformer
+
 plugins {
     id 'scala'
     id 'application'
     id 'org.openjfx.javafxplugin' version '0.0.8'
+    id "com.github.johnrengelman.shadow" version "5.2.0"
 }
 
 repositories {
@@ -12,6 +15,12 @@ repositories {
 sourceCompatibility = 13
 targetCompatibility = 13
 
+shadowJar {
+    transform(AppendingTransformer) {
+        resource = 'reference.conf'
+    }
+}
+
 javafx {
     version = "13"
     modules = [ 'javafx.controls']
@@ -20,15 +29,6 @@ javafx {
 dependencies {
     implementation group: 'com.typesafe.akka', name: 'akka-cluster_2.13', version: '2.6.3'
     implementation group: 'com.typesafe.akka', name: 'akka-cluster-tools_2.13', version: '2.6.3'
-
-//    implementation fileTree(dir: 'lib', include: ['*.jar'])
-//    implementation fileTree(dir: 'lib', include: ['*.jmod'])
-
-//    implementation group: 'org.openjfx', name: 'javafx-base', version: '13'
-//
-//    implementation group: 'org.openjfx', name: 'javafx-graphics', version: '13'
-//
-//    implementation group: 'org.openjfx', name: 'javafx-controls', version: '13'
 }
 
 application {
