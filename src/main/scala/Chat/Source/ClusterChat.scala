@@ -6,10 +6,11 @@ import akka.cluster.Cluster
 import com.typesafe.config.{Config, ConfigFactory}
 
 class ClusterChat(ip: String) {
-  private val system: ActorSystem = createConnection
+  private val system: ActorSystem = createActorSystem
   private val cluster: Cluster = Cluster(system)
   private var check: Boolean = false
   private var name = ""
+  private var actors: Array[ActorRef] = Array.empty
 
   cluster.registerOnMemberUp({
     check = true
@@ -17,7 +18,7 @@ class ClusterChat(ip: String) {
 
   def createActors(name: String, messagesSender: MessagesSender): Array[ActorRef] = {
     this.name = name
-    val actors: Array[ActorRef] = Array(
+    actors = Array(
       system.actorOf(Props(classOf[ChatRoom], messagesSender), ip.toString),
       system.actorOf(Props[Publisher], ip.toString + "pub"),
       system.actorOf(Props(classOf[PrivateChatDestination], messagesSender), name),
@@ -25,7 +26,7 @@ class ClusterChat(ip: String) {
     actors
   }
 
-  private def createConnection: ActorSystem = {
+  private def createActorSystem: ActorSystem = {
     val config: Config = ConfigFactory.parseString(s"""akka.remote.artery.canonical.hostname = "127.0.0.$ip"""")
       .withFallback(ConfigFactory.load())
     val system: ActorSystem = ActorSystem("Cluster", config)

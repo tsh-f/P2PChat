@@ -34,18 +34,3 @@ dependencies {
 application {
     mainClassName = "Chat.Main"
 }
-
-task fatJar(type: Jar) {
-    manifest {
-        attributes 'Implementation-Title': 'Chat',
-                'Main-Class': mainClassName
-    }
-    from {
-        configurations.compileClasspath.collect{
-            it.isDirectory() ? it : zipTree(it)
-        }
-    }
-    with jar
-}
-
-
