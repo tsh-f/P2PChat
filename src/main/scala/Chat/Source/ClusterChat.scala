@@ -1,7 +1,6 @@
-package Source
+package Chat.Source
 
-import Chats._
-import UI.ChatUI
+import Chat.Chats._
 import akka.actor.{ActorRef, ActorSystem, Props}
 import akka.cluster.Cluster
 import com.typesafe.config.{Config, ConfigFactory}
@@ -16,13 +15,13 @@ class ClusterChat(ip: String) {
     check = true
   })
 
-  def createActors(name: String, chatUI: ChatUI): Array[ActorRef] = {
+  def createActors(name: String, messagesSender: MessagesSender): Array[ActorRef] = {
     this.name = name
     val actors: Array[ActorRef] = Array(
-      system.actorOf(Props(classOf[ChatRoom], chatUI), ip.toString),
-      system.actorOf(Props(classOf[Publisher], chatUI), ip.toString + "pub"),
-      system.actorOf(Props(classOf[PrivateChatDestination], chatUI), name),
-      system.actorOf(Props(classOf[PrivateChatSender], chatUI)))
+      system.actorOf(Props(classOf[ChatRoom], messagesSender), ip.toString),
+      system.actorOf(Props[Publisher], ip.toString + "pub"),
+      system.actorOf(Props(classOf[PrivateChatDestination], messagesSender), name),
+      system.actorOf(Props[PrivateChatSender]))
     actors
   }
 

@@ -4,39 +4,48 @@ plugins {
     id 'org.openjfx.javafxplugin' version '0.0.8'
 }
 
-sourceCompatibility = 1.13
-targetCompatibility = 1.13
-
 repositories {
+    jcenter()
     mavenCentral()
 }
 
+sourceCompatibility = 13
+targetCompatibility = 13
+
 javafx {
     version = "13"
-    modules = [ 'javafx.controls' ]
+    modules = [ 'javafx.controls']
 }
 
 dependencies {
     implementation group: 'com.typesafe.akka', name: 'akka-cluster_2.13', version: '2.6.3'
-
     implementation group: 'com.typesafe.akka', name: 'akka-cluster-tools_2.13', version: '2.6.3'
 
-    implementation group: 'org.openjfx', name: 'javafx-base', version: '13'
+//    implementation fileTree(dir: 'lib', include: ['*.jar'])
+//    implementation fileTree(dir: 'lib', include: ['*.jmod'])
 
-    implementation group: 'org.openjfx', name: 'javafx-graphics', version: '13'
-
-    implementation group: 'org.openjfx', name: 'javafx-controls', version: '13'
-
-    implementation group: 'org.openjfx', name: 'javafx-fxml', version: '13'
+//    implementation group: 'org.openjfx', name: 'javafx-base', version: '13'
+//
+//    implementation group: 'org.openjfx', name: 'javafx-graphics', version: '13'
+//
+//    implementation group: 'org.openjfx', name: 'javafx-controls', version: '13'
 }
 
-mainClassName = 'UI.ChatUI'
+application {
+    mainClassName = "Chat.Main"
+}
 
 task fatJar(type: Jar) {
     manifest {
         attributes 'Implementation-Title': 'Chat',
-                'Main-Class': 'UI.ChatUI'
+                'Main-Class': mainClassName
     }
-    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    from {
+        configurations.compileClasspath.collect{
+            it.isDirectory() ? it : zipTree(it)
+        }
+    }
     with jar
 }
+
+

@@ -1,20 +1,20 @@
-package Chats
+package Chat.Chats
 
-import UI.ChatUI
+import Chat.Source.MessagesSender
 import akka.actor.{Actor, ActorLogging, ActorRef}
 import akka.cluster.pubsub.DistributedPubSub
 import akka.cluster.pubsub.DistributedPubSubMediator.{Put, Send}
 
-class PrivateChatDestination(chatUI: ChatUI) extends Actor with ActorLogging{
+class PrivateChatDestination(messagesSender: MessagesSender) extends Actor with ActorLogging{
   val mediator: ActorRef = DistributedPubSub(context.system).mediator
   mediator ! Put(self)
   override def receive: Receive = {
     case PrintPrivateMessage(msg, name) =>
-      chatUI.printMessage(msg, name)
+      messagesSender.printMessage(msg, name)
   }
 }
 
-class PrivateChatSender(chatUI: ChatUI) extends Actor with ActorLogging{
+class PrivateChatSender extends Actor with ActorLogging{
   val mediator: ActorRef = DistributedPubSub(context.system).mediator
 
   override def receive: Receive = {
