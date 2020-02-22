@@ -3,7 +3,7 @@ package Chat.Chats
 import Chat.Source.MessagesSender
 import akka.actor.{Actor, ActorLogging, ActorRef}
 import akka.cluster.pubsub.DistributedPubSub
-import akka.cluster.pubsub.DistributedPubSubMediator.{Publish, Subscribe, SubscribeAck}
+import akka.cluster.pubsub.DistributedPubSubMediator.{Publish, Subscribe}
 
 class ChatRoom(messagesSender: MessagesSender) extends Actor with ActorLogging {
   val mediator: ActorRef = DistributedPubSub(context.system).mediator
@@ -12,8 +12,6 @@ class ChatRoom(messagesSender: MessagesSender) extends Actor with ActorLogging {
   override def receive: Receive = {
     case MessageToPublish(msg, name) =>
       messagesSender.printMessage(msg, name)
-    case SubscribeAck(Subscribe("ChatRoom", None, self)) =>
-      log.info("subscribing")
   }
 }
 
